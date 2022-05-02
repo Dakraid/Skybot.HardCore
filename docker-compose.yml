@@ -1,4 +1,4 @@
-version: '3.5'
+version: "3.9"
 
 services:
   postgres:
@@ -14,7 +14,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - postgres
+      - network
   
   pgadmin:
     container_name: pgadmin_container
@@ -29,7 +29,7 @@ services:
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - postgres
+      - network
 
   redis:
     container_name: redis_container
@@ -39,15 +39,27 @@ services:
     volumes: 
       - redis:/data
     ports:
-      - '6379:6379'
+      - "6379:6379"
     networks:
-      - postgres
+      - network
+
+  p3x-redis-ui:
+    container_name: p3x-redis-ui_container
+    image: patrikx3/p3x-redis-ui:latest
+    restart: unless-stopped
+    volumes: 
+      - p3x:/settings
+    ports:
+      - "7843:7843"
+    networks:
+      - network
 
 networks:
-  postgres:
+  network:
     driver: bridge
 
 volumes:
     postgres:
     pgadmin:
     redis:
+    p3x:

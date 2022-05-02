@@ -3,69 +3,74 @@
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 26.12.2021 21:46
-// Last Modified On : 02.05.2022 17:49
+// Last Modified On : 02.05.2022 22:01
 // Copyrights : Copyright (c) Kristian Schlikow 2021-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Skybot.HardCore;
-
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
-
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
-using Services;
-
-public class Program
+namespace Skybot.HardCore
 {
-    private readonly IConfiguration _configuration;
-    private readonly IServiceProvider _services;
+    using Database;
 
-    private readonly DiscordSocketConfig _socketConfig = new()
+    using Discord;
+    using Discord.Commands;
+    using Discord.WebSocket;
+
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+
+    using Services;
+
+    public class Program
     {
-        LogLevel = LogSeverity.Info, MessageCacheSize = 100, GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers, AlwaysDownloadUsers = true
-    };
+        private readonly IConfiguration _configuration;
+        private readonly IServiceProvider _services;
 
-    private Program()
-    {
-        _configuration = new ConfigurationBuilder()
-                         .AddJsonFile("appsettings.json")
-                         .Build();
+        private readonly DiscordSocketConfig _socketConfig = new()
+        {
+            LogLevel = LogSeverity.Info, MessageCacheSize = 100, GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers, AlwaysDownloadUsers = true
+        };
 
-        _services = new ServiceCollection()
-                    .AddSingleton(_configuration)
-                    .AddSingleton(_socketConfig)
-                    .AddSingleton<LogService>()
-                    .AddSingleton<DiscordSocketClient>()
-                    .AddSingleton<CommandService>()
-                    .AddSingleton<CommandHandlingService>()
-                    .AddSingleton<HttpClient>()
-                    .AddSingleton<PictureService>()
-                    .BuildServiceProvider();
-    }
+        private Program()
+        {
+            _configuration = new ConfigurationBuilder()
+                             .AddJsonFile("appsettings.json")
+                             .Build();
 
-    private static void Main(string[] args)
-    {
-        new Program().MainAsync().GetAwaiter().GetResult();
-    }
+            _services = new ServiceCollection()
+                        .AddSingleton(_configuration)
+                        .AddSingleton(_socketConfig)
+                        .AddSingleton<LogService>()
+                        .AddSingleton<DiscordSocketClient>()
+                        .AddSingleton<CommandService>()
+                        .AddSingleton<CommandHandlingService>()
+                        .AddSingleton<HttpClient>()
+                        .AddSingleton<PictureService>()
+                        .AddDbContext<DatabaseContext>(options =>
+                        {
+                            options.UseNpgsql(_configuration.GetValue<string>("Data:PostgresConnectionString"));
+                        })
+                        .BuildServiceProvider();
+        }
 
-    private async Task MainAsync()
-    {
-        var client = _services.GetRequiredService<DiscordSocketClient>();
-        var logger = _services.GetRequiredService<LogService>();
+        private static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
-        client.Log                                         += logger.LogAsync;
-        _services.GetRequiredService<CommandService>().Log += logger.LogAsync;
+        private async Task MainAsync()
+        {
+            var client = _services.GetRequiredService<DiscordSocketClient>();
+            var logger = _services.GetRequiredService<LogService>();
 
-        await client.LoginAsync(TokenType.Bot, _configuration.GetSection("Bot")["Token"]);
-        await client.StartAsync();
+            client.Log                                         += logger.LogAsync;
+            _services.GetRequiredService<CommandService>().Log += logger.LogAsync;
 
-        await _services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+            await client.LoginAsync(TokenType.Bot, _configuration.GetSection("Bot")["Token"]);
+            await client.StartAsync();
 
-        await Task.Delay(Timeout.Infinite);
+            await _services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+
+            await Task.Delay(Timeout.Infinite);
+        }
     }
 }

@@ -3,85 +3,120 @@
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 30.04.2022 17:00
-// Last Modified On : 02.05.2022 17:49
+// Last Modified On : 02.05.2022 22:01
 // Copyrights : Copyright (c) Kristian Schlikow 2022-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Skybot.HardCore.Modules;
-
-using System.Reflection;
-
-using Database;
-
-using Discord;
-using Discord.Commands;
-
-using Entities;
-
-// Modules must be public and inherit from an IModuleBase
-public class InfoModule : ModuleBase<SocketCommandContext>
+namespace Skybot.HardCore.Modules
 {
-    [Command("about")]
-    public Task AboutAsync()
-    {
-        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
-        var color = (uint)Random.Shared.Next(0, 16777215);
-        var icon = Context.Client.CurrentUser.GetAvatarUrl() ?? "https://cdn.discordapp.com/embed/avatars/0.png";
-        var name = Context.Client.CurrentUser.Username ?? "Skybot.HardCore";
+    using Database;
 
-        var embed = new EmbedBuilder
+    using Discord;
+    using Discord.Commands;
+
+    using Entities;
+
+    using System.Reflection;
+
+    // Modules must be public and inherit from an IModuleBase
+    public class InfoModule : ModuleBase<SocketCommandContext>
+    {
+        private readonly DatabaseContext _databaseContext;
+
+        public InfoModule(DatabaseContext databaseContext) => _databaseContext = databaseContext;
+
+        [Command("about")]
+        public Task AboutAsync()
         {
-            Title = "Running using Skybot.HardCore",
-            Description = $"Currently used version is {version}.",
-            Color = new Color(color),
-            Author = new EmbedAuthorBuilder
+            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
+            var color   = (uint)Random.Shared.Next(0, 16777215);
+            var icon    = Context.Client.CurrentUser.GetAvatarUrl() ?? "https://cdn.discordapp.com/embed/avatars/0.png";
+            var name    = Context.Client.CurrentUser.Username ?? "Skybot.HardCore";
+
+            var embed = new EmbedBuilder
             {
-                IconUrl = icon,
-                Name = name
-            },
-            Footer = new EmbedFooterBuilder
-            {
-                IconUrl = "https://cdn.discordapp.com/avatars/137352005818646529/248d65f033a78bc2d5df832f9dbcaf04.png?size=4096",
-                Text = "Developed by Netrve"
-            },
-            ThumbnailUrl = icon
-        };
-        embed.WithCurrentTimestamp();
+                Title       = "Running using Skybot.HardCore",
+                Description = $"Currently used version is {version}.",
+                Color       = new Color(color),
+                Author = new EmbedAuthorBuilder
+                {
+                    IconUrl = icon, Name = name
+                },
+                Footer = new EmbedFooterBuilder
+                {
+                    IconUrl = "https://cdn.discordapp.com/avatars/137352005818646529/248d65f033a78bc2d5df832f9dbcaf04.png?size=4096", Text = "Developed by Netrve"
+                },
+                ThumbnailUrl = icon
+            };
+            embed.WithCurrentTimestamp();
 
-        return ReplyAsync(embed: embed.Build());
-    }
+            return ReplyAsync(embed: embed.Build());
+        }
 
-    [Command("pingDb")]
-    public Task PingDbAsync()
-    {
-        using var databaseContext = new DatabaseContext();
-
-        var users = databaseContext.DiscordUsers.ToList();
-
-        return ReplyAsync($"I know {users.Count} Discord users.");
-    }
-
-    [Command("importUsers")]
-    public async Task ImportUsersAsync()
-    {
-        await using var databaseContext = new DatabaseContext();
-        await ReplyAsync($"Starting import of {Context.Guild.MemberCount} Guild members.");
-
-        var users = Context.Guild.Users.Select(socketGuildUser => new DiscordUser
+        [Command("importUsers")]
+        public async Task ImportUsersAsync()
         {
-            Id = Guid.NewGuid(),
-            IsBlocked = false,
-            UserDiscriminator = socketGuildUser.DiscriminatorValue,
-            UserDisplayName = socketGuildUser.DisplayName,
-            UserId = socketGuildUser.Id
-        }).ToList();
-        await ReplyAsync($"Created {users.Count} Discord user objects. Saving to database.");
+            if (Context.User.Id != 137352005818646529)
+            {
+                await ReplyAsync("User not authorized to run this command.");
 
-        databaseContext.DiscordUsers.AddRange(users);
-        await databaseContext.SaveChangesAsync(CancellationToken.None);
+                return;
+            }
 
-        await ReplyAsync($"Imported {databaseContext.DiscordUsers.Count()} Guild members as Discord users.");
+            await ReplyAsync($"Starting import of {Context.Guild.MemberCount} Guild members.");
+
+            var users = Context.Guild.Users.Select(socketGuildUser => new DiscordUser
+            {
+                Id                = Guid.NewGuid(),
+                IsBlocked         = false,
+                UserDiscriminator = socketGuildUser.DiscriminatorValue,
+                UserDisplayName   = socketGuildUser.DisplayName,
+                UserId            = socketGuildUser.Id
+            }).ToList();
+
+            await ReplyAsync("Filtering list to only import new users.");
+
+            var filteredUsers = users.ExceptBy(_databaseContext.DiscordUsers.Select(u => u.UserId), u => u.UserId).ToList();
+
+            await ReplyAsync($"Created {filteredUsers.Count} Discord user objects. Saving to database.");
+
+            _databaseContext.DiscordUsers.AddRange(filteredUsers);
+            await _databaseContext.SaveChangesAsync(CancellationToken.None);
+
+            await ReplyAsync($"Imported {filteredUsers.Count} Guild members as Discord users. Total count of users is {_databaseContext.DiscordUsers.Count()}.");
+        }
+
+        [Command("importChannels")]
+        public async Task ImportChannelsAsync()
+        {
+            if (Context.User.Id != 137352005818646529)
+            {
+                await ReplyAsync("User not authorized to run this command.");
+
+                return;
+            }
+
+            var discordChannels = Context.Guild.Channels.Where(c => (c.GetChannelType() == ChannelType.Text) | (c.GetChannelType() == ChannelType.PublicThread)).ToList();
+
+            await ReplyAsync($"Starting import of {discordChannels.Count} channels/threads.");
+
+            var channels = discordChannels.Select(socketGuildChannel => new DiscordChannel
+            {
+                Id = Guid.NewGuid(), ChannelId = socketGuildChannel.Id, ChannelName = socketGuildChannel.Name
+            }).ToList();
+
+            await ReplyAsync("Filtering list to only import new channels.");
+
+            var filteredChannels = channels.ExceptBy(_databaseContext.DiscordChannels.Select(u => u.ChannelId), u => u.ChannelId).ToList();
+
+            await ReplyAsync($"Created {filteredChannels.Count} Discord channel objects. Saving to database.");
+
+            _databaseContext.DiscordChannels.AddRange(filteredChannels);
+            await _databaseContext.SaveChangesAsync(CancellationToken.None);
+
+            await ReplyAsync($"Imported {filteredChannels.Count} Guild channels as Discord channels. Total count of channels is {_databaseContext.DiscordChannels.Count()}.");
+        }
     }
 }
