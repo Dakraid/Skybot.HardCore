@@ -2,8 +2,8 @@
 // Filename : Program.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
-// Created On : 26.12.2021 21:46
-// Last Modified On : 02.05.2022 22:03
+// Created On : 26.12.2021
+// Last Modified On : 02.05.2022
 // Copyrights : Copyright (c) Kristian Schlikow 2021-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
