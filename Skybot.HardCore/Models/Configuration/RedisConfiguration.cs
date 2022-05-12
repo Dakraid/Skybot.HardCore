@@ -9,21 +9,23 @@
 // If present, the license takes precedence over the individual notice within this file
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Skybot.HardCore.Database
+namespace Skybot.HardCore.Models.Configuration
 {
     using EFCache;
     using EFCache.Redis;
 
     using Microsoft.Extensions.Configuration;
 
+    using Skybot.HardCore.Models.Configuration.Configuration;
+
     using System.Data.Entity;
 
-    public class Configuration : DbConfiguration
+    public class RedisConfiguration : DbConfiguration
     {
-        public Configuration(IConfiguration configuration)
+        public RedisConfiguration(IConfiguration configuration)
         {
-            var redisConnection    = configuration.GetValue<string>("Data:RedisConnectionString");
-            var cache              = new RedisCache(redisConnection);
+            var redisConnection = configuration.GetValue<string>("Data:RedisConnectionString");
+            var cache = new RedisCache(redisConnection);
             var transactionHandler = new CacheTransactionHandler(cache);
             AddInterceptor(transactionHandler);
 

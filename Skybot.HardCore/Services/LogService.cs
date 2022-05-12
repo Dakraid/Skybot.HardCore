@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // Filename : LogService.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
@@ -18,13 +18,8 @@ namespace Skybot.HardCore.Services
     public class LogService
     {
         private readonly IConfiguration _configuration;
-        private readonly IServiceProvider _services;
 
-        public LogService(IServiceProvider services, IConfiguration configuration)
-        {
-            _services      = services;
-            _configuration = configuration;
-        }
+        public LogService(IConfiguration configuration) => _configuration = configuration;
 
         public Task LogAsync(LogMessage message)
         {

@@ -11,42 +11,44 @@
 
 namespace Skybot.HardCore.Modules
 {
-    using Database;
 
     using Discord;
     using Discord.Commands;
 
-    using Entities;
+    using Skybot.HardCore.Models;
+    using Skybot.HardCore.Models.Configuration.Configuration;
 
     using System.Reflection;
 
     // Modules must be public and inherit from an IModuleBase
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
-        private readonly DatabaseContext _databaseContext;
+        private readonly SkybotContext _databaseContext;
 
-        public InfoModule(DatabaseContext databaseContext) => _databaseContext = databaseContext;
+        public InfoModule(SkybotContext databaseContext) => _databaseContext = databaseContext;
 
         [Command("about")]
         public Task AboutAsync()
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
-            var color   = (uint)Random.Shared.Next(0, 16777215);
-            var icon    = Context.Client.CurrentUser.GetAvatarUrl() ?? "https://cdn.discordapp.com/embed/avatars/0.png";
-            var name    = Context.Client.CurrentUser.Username ?? "Skybot.HardCore";
+            var color = (uint)Random.Shared.Next(0, 16777215);
+            var icon = Context.Client.CurrentUser.GetAvatarUrl() ?? "https://cdn.discordapp.com/embed/avatars/0.png";
+            var name = Context.Client.CurrentUser.Username ?? "Skybot.HardCore";
 
             var embed = new EmbedBuilder
             {
-                Title       = "Running using Skybot.HardCore",
+                Title = "Running using Skybot.HardCore",
                 Description = $"Currently used version is {version}.",
-                Color       = new Color(color),
+                Color = new Color(color),
                 Author = new EmbedAuthorBuilder
                 {
-                    IconUrl = icon, Name = name
+                    IconUrl = icon,
+                    Name = name
                 },
                 Footer = new EmbedFooterBuilder
                 {
-                    IconUrl = "https://cdn.discordapp.com/avatars/137352005818646529/248d65f033a78bc2d5df832f9dbcaf04.png?size=4096", Text = "Developed by Netrve"
+                    IconUrl = "https://cdn.discordapp.com/avatars/137352005818646529/248d65f033a78bc2d5df832f9dbcaf04.png?size=4096",
+                    Text = "Developed by Netrve"
                 },
                 ThumbnailUrl = icon
             };
@@ -69,11 +71,11 @@ namespace Skybot.HardCore.Modules
 
             var users = Context.Guild.Users.Select(socketGuildUser => new DiscordUser
             {
-                Id                = Guid.NewGuid(),
-                IsBlocked         = false,
-                UserDiscriminator = socketGuildUser.DiscriminatorValue,
-                UserDisplayName   = socketGuildUser.DisplayName,
-                UserId            = socketGuildUser.Id
+                UserId = Guid.NewGuid(),
+                IsBlocked = false,
+                DiscordUserDiscriminator = socketGuildUser.DiscriminatorValue,
+                DiscordUserDisplayName = socketGuildUser.DisplayName,
+                DiscordUserId = socketGuildUser.Id
             }).ToList();
 
             await ReplyAsync("Filtering list to only import new users.");
@@ -104,7 +106,9 @@ namespace Skybot.HardCore.Modules
 
             var channels = discordChannels.Select(socketGuildChannel => new DiscordChannel
             {
-                Id = Guid.NewGuid(), ChannelId = socketGuildChannel.Id, ChannelName = socketGuildChannel.Name
+                ChannelId = Guid.NewGuid(),
+                DiscordChannelId = socketGuildChannel.Id,
+                DiscordChannelName = socketGuildChannel.Name
             }).ToList();
 
             await ReplyAsync("Filtering list to only import new channels.");

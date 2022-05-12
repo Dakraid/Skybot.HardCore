@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// Filename : RedisCachingPolicy.cs
+// Filename : DiscordUser.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 02.05.2022
@@ -9,19 +9,17 @@
 // If present, the license takes precedence over the individual notice within this file
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Skybot.HardCore.Database
+namespace Skybot.HardCore.Models
 {
-    using EFCache;
+    using System.ComponentModel.DataAnnotations;
 
-    using System.Collections.ObjectModel;
-    using System.Data.Entity.Core.Metadata.Edm;
-
-    public class RedisCachingPolicy : CachingPolicy
+    public class DiscordUser
     {
-        protected override void GetExpirationTimeout(ReadOnlyCollection<EntitySetBase> affectedEntitySets, out TimeSpan slidingExpiration, out DateTimeOffset absoluteExpiration)
-        {
-            slidingExpiration = TimeSpan.FromMinutes(5);
-            absoluteExpiration = DateTimeOffset.Now.AddMinutes(30);
-        }
+        [Key]
+        public Guid UserId { get; set; }
+        public decimal DiscordUserId { get; set; }
+        public string DiscordUserDisplayName { get; set; } = null!;
+        public decimal DiscordUserDiscriminator { get; set; }
+        public bool IsBlocked { get; set; }
     }
 }

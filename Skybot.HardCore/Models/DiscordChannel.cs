@@ -9,12 +9,15 @@
 // If present, the license takes precedence over the individual notice within this file
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Skybot.HardCore.Entities
+namespace Skybot.HardCore.Models
 {
+    using System.ComponentModel.DataAnnotations;
+
     public class DiscordChannel
     {
-        public Guid Id { get; set; }
-        public decimal ChannelId { get; set; }
-        public string ChannelName { get; set; } = null!;
+        [Key]
+        public Guid ChannelId { get; set; }
+        public decimal DiscordChannelId { get; set; }
+        public string DiscordChannelName { get; set; } = null!;
     }
 }
