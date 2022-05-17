@@ -1,9 +1,9 @@
 // --------------------------------------------------------------------------------------------------------------------
-// Filename : HelperService.cs
+// Filename : PermissionService.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
-// Created On : 14.05.2022
-// Last Modified On : 14.05.2022
+// Created On : 16.05.2022
+// Last Modified On : 17.05.2022
 // Copyrights : Copyright (c) Kristian Schlikow 2022-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
@@ -71,7 +71,10 @@ namespace Skybot.HardCore.Services
             {
                 Command = commandName,
                 PermissionId = Guid.NewGuid(),
-                DiscordUsers = new List<DiscordUser> { user }
+                DiscordUsers = new List<DiscordUser>
+                {
+                    user
+                }
             });
             await _database.SaveChangesAsync();
 
@@ -91,7 +94,10 @@ namespace Skybot.HardCore.Services
             {
                 Command = commandName,
                 PermissionId = Guid.NewGuid(),
-                DiscordRoles = new List<DiscordRole> { role }
+                DiscordRoles = new List<DiscordRole>
+                {
+                    role
+                }
             });
             await _database.SaveChangesAsync();
 
@@ -192,12 +198,14 @@ namespace Skybot.HardCore.Services
             if (commandPermissions == null || commandPermissions.SpecialPermission == SpecialPermission.Owner)
             {
                 var dataUser = await _database.DiscordUsers.FindAsync(context.User.Id);
+
                 if (dataUser != null)
                 {
                     await _database.Entry(dataUser).ReloadAsync();
                 }
 
                 var ownerCheck = (await _database.DiscordUsers.FindAsync(context.User.Id))?.IsOwner;
+
                 if (ownerCheck.HasValue && ownerCheck.Value)
                 {
                     return true;

@@ -3,7 +3,7 @@
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 30.04.2022
-// Last Modified On : 14.05.2022
+// Last Modified On : 17.05.2022
 // Copyrights : Copyright (c) Kristian Schlikow 2022-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
@@ -26,10 +26,10 @@ namespace Skybot.HardCore.Modules
     // Modules must be public and inherit from an IModuleBase
     public class SystemModule : ModuleBase<SocketCommandContext>
     {
+        private readonly CommandService _commands;
         private readonly SkybotContext _databaseContext;
         private readonly PermissionService _permissions;
         private readonly SystemService _system;
-        private readonly CommandService _commands;
 
         public SystemModule(IServiceProvider services, SkybotContext databaseContext, PermissionService permissions, SystemService system)
         {
@@ -46,6 +46,7 @@ namespace Skybot.HardCore.Modules
             if (!await _permissions.VerifyPermission(Context, "help"))
             {
                 await ReplyAsync("You have no permissions to access this command.");
+
                 return;
             }
 
@@ -83,6 +84,7 @@ namespace Skybot.HardCore.Modules
             if (!await _permissions.VerifyPermission(Context, "about"))
             {
                 await ReplyAsync("You have no permissions to access this command.");
+
                 return;
             }
 
@@ -120,6 +122,7 @@ namespace Skybot.HardCore.Modules
             if (!await _permissions.VerifyPermission(Context, "importUsers"))
             {
                 await ReplyAsync("You have no permissions to access this command.");
+
                 return;
             }
 
@@ -134,6 +137,7 @@ namespace Skybot.HardCore.Modules
             if (!await _permissions.VerifyPermission(Context, "importChannels"))
             {
                 await ReplyAsync("You have no permissions to access this command.");
+
                 return;
             }
 
@@ -148,6 +152,7 @@ namespace Skybot.HardCore.Modules
             if (!await _permissions.VerifyPermission(Context, "importRoles"))
             {
                 await ReplyAsync("You have no permissions to access this command.");
+
                 return;
             }
 

@@ -3,7 +3,7 @@
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 26.12.2021
-// Last Modified On : 14.05.2022
+// Last Modified On : 17.05.2022
 // Copyrights : Copyright (c) Kristian Schlikow 2021-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
@@ -29,17 +29,14 @@ namespace Skybot.HardCore
 
     public class Program : IDisposable
     {
+        private readonly DiscordSocketClient _client;
         private readonly IConfiguration _configuration;
         private readonly IServiceCollection _serviceCollection = new ServiceCollection();
         private readonly IServiceProvider _serviceProvider;
-        private readonly DiscordSocketClient _client;
 
         private readonly DiscordSocketConfig _socketConfig = new()
         {
-            LogLevel = LogSeverity.Info,
-            MessageCacheSize = 100,
-            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers,
-            AlwaysDownloadUsers = true
+            LogLevel = LogSeverity.Info, MessageCacheSize = 100, GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers, AlwaysDownloadUsers = true
         };
 
         private Program()
@@ -49,10 +46,15 @@ namespace Skybot.HardCore
                              .AddUserSecrets<Program>()
                              .Build();
 
-
             _client = new DiscordSocketClient(_socketConfig);
 
             _serviceProvider = ConfigureServices(_serviceCollection, _configuration, _client);
+        }
+
+        public async void Dispose()
+        {
+            await _client.DisposeAsync();
+            await _serviceProvider.GetRequiredService<SkybotContext>().DisposeAsync();
         }
 
         private static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
@@ -72,7 +74,7 @@ namespace Skybot.HardCore
             var client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
             var logger = _serviceProvider.GetRequiredService<ILogService>();
 
-            client.Log += logger.LogAsync;
+            client.Log                                                += logger.LogAsync;
             _serviceProvider.GetRequiredService<CommandService>().Log += logger.LogAsync;
 
             await client.LoginAsync(TokenType.Bot, _configuration.GetSection("Bot")["Token"]);
@@ -80,14 +82,17 @@ namespace Skybot.HardCore
 
             await _serviceProvider.GetRequiredService<ICommandHandlingService>().InitializeAsync();
 
-            client.Ready += Client_Ready; ;
+            client.Ready += Client_Ready;
+            ;
 
             client.UserUpdated += Client_UserUpdated;
-            client.UserJoined += Client_UserJoined; ;
-            client.UserLeft += Client_UserLeft; ;
+            client.UserJoined  += Client_UserJoined;
+            ;
+            client.UserLeft += Client_UserLeft;
+            ;
 
-            client.ChannelUpdated += Client_ChannelUpdated;
-            client.ChannelCreated += Client_ChannelCreated;
+            client.ChannelUpdated   += Client_ChannelUpdated;
+            client.ChannelCreated   += Client_ChannelCreated;
             client.ChannelDestroyed += Client_ChannelDestroyed;
 
             client.RoleUpdated += Client_RoleUpdated;
@@ -129,12 +134,6 @@ namespace Skybot.HardCore
             services.AddSingleton<SystemService>();
 
             return services.BuildServiceProvider();
-        }
-
-        public async void Dispose()
-        {
-            await _client.DisposeAsync();
-            await _serviceProvider.GetRequiredService<SkybotContext>().DisposeAsync();
         }
     }
 }

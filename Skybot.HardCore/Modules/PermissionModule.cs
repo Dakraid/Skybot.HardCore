@@ -1,9 +1,9 @@
 // --------------------------------------------------------------------------------------------------------------------
-// Filename : SystemModule.cs
+// Filename : PermissionModule.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
-// Created On : 30.04.2022
-// Last Modified On : 14.05.2022
+// Created On : 17.05.2022
+// Last Modified On : 17.05.2022
 // Copyrights : Copyright (c) Kristian Schlikow 2022-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
@@ -11,17 +11,11 @@
 
 namespace Skybot.HardCore.Modules
 {
-    using Discord;
     using Discord.Commands;
 
-    using Enums;
-
-    using Models;
     using Models.Configuration;
 
     using Services;
-
-    using System.Reflection;
 
     [Group("perms")]
     public class PermissionModule : ModuleBase<SocketCommandContext>
@@ -44,7 +38,6 @@ namespace Skybot.HardCore.Modules
             if (!await _permissions.VerifyPermission(Context, "permsGrant"))
             {
                 await ReplyAsync("You have no permissions to access this command.");
-                return;
             }
         }
 
@@ -55,7 +48,6 @@ namespace Skybot.HardCore.Modules
             if (!await _permissions.VerifyPermission(Context, "permsRevoke"))
             {
                 await ReplyAsync("You have no permissions to access this command.");
-                return;
             }
         }
 
@@ -69,6 +61,7 @@ namespace Skybot.HardCore.Modules
             if (!await _permissions.VerifyPermission(Context, "permsList"))
             {
                 await ReplyAsync("You have no permissions to access this command.");
+
                 return;
             }
 

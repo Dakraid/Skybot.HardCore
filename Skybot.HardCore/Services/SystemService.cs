@@ -1,9 +1,9 @@
 // --------------------------------------------------------------------------------------------------------------------
-// Filename : HelperService.cs
+// Filename : SystemService.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
-// Created On : 14.05.2022
-// Last Modified On : 14.05.2022
+// Created On : 16.05.2022
+// Last Modified On : 17.05.2022
 // Copyrights : Copyright (c) Kristian Schlikow 2022-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
@@ -12,7 +12,6 @@
 namespace Skybot.HardCore.Services
 {
     using Discord;
-    using Discord.Commands;
     using Discord.WebSocket;
 
     using Interfaces;
@@ -34,11 +33,11 @@ namespace Skybot.HardCore.Services
 
         public SystemService(IServiceProvider services, IConfiguration configuration, SkybotContext database)
         {
-            _discord = services.GetRequiredService<DiscordSocketClient>();
-            _log = services.GetRequiredService<ILogService>();
-            _services = services;
+            _discord       = services.GetRequiredService<DiscordSocketClient>();
+            _log           = services.GetRequiredService<ILogService>();
+            _services      = services;
             _configuration = configuration;
-            _database = database;
+            _database      = database;
         }
 
         public async Task InitializeAsync()
@@ -51,9 +50,11 @@ namespace Skybot.HardCore.Services
         public async Task ScanUsersAsync()
         {
             var context = _discord.Guilds.FirstOrDefault();
+
             if (context == null)
             {
                 await _log.LogAsync(LogSeverity.Error, nameof(SystemService), "No Guild found.");
+
                 return;
             }
 
@@ -63,10 +64,7 @@ namespace Skybot.HardCore.Services
 
             var users = context.Users.Select(socketGuildUser => new DiscordUser
             {
-                IsBlocked = false,
-                DiscordUserDiscriminator = socketGuildUser.DiscriminatorValue,
-                DiscordUserDisplayName = socketGuildUser.DisplayName,
-                DiscordUserId = socketGuildUser.Id
+                IsBlocked = false, DiscordUserDiscriminator = socketGuildUser.DiscriminatorValue, DiscordUserDisplayName = socketGuildUser.DisplayName, DiscordUserId = socketGuildUser.Id
             }).ToList();
 
             var newUsers = users.ExceptBy(_database.DiscordUsers.Select(e => e.DiscordUserId), x => x.DiscordUserId).ToList();
@@ -101,9 +99,11 @@ namespace Skybot.HardCore.Services
         public async Task ScanChannelsAsync()
         {
             var context = _discord.Guilds.FirstOrDefault();
+
             if (context == null)
             {
                 await _log.LogAsync(LogSeverity.Error, nameof(SystemService), "No Guild found.");
+
                 return;
             }
 
@@ -115,8 +115,7 @@ namespace Skybot.HardCore.Services
 
             var channels = discordChannels.Select(socketGuildChannel => new DiscordChannel
             {
-                DiscordChannelId = socketGuildChannel.Id,
-                DiscordChannelName = socketGuildChannel.Name
+                DiscordChannelId = socketGuildChannel.Id, DiscordChannelName = socketGuildChannel.Name
             }).ToList();
 
             var newChannels = channels.ExceptBy(_database.DiscordChannels.Select(e => e.DiscordChannelId), x => x.DiscordChannelId).ToList();
@@ -151,9 +150,11 @@ namespace Skybot.HardCore.Services
         public async Task ScanRolesAsync()
         {
             var context = _discord.Guilds.FirstOrDefault();
+
             if (context == null)
             {
                 await _log.LogAsync(LogSeverity.Error, nameof(SystemService), "No Guild found.");
+
                 return;
             }
 
@@ -165,8 +166,7 @@ namespace Skybot.HardCore.Services
 
             var roles = discordRoles.Select(socketRole => new DiscordRole
             {
-                DiscordRoleId = socketRole.Id,
-                DiscordRoleName = socketRole.Name
+                DiscordRoleId = socketRole.Id, DiscordRoleName = socketRole.Name
             }).ToList();
 
             var newRoles = roles.ExceptBy(_database.DiscordRoles.Select(e => e.DiscordRoleId), x => x.DiscordRoleId).ToList();
