@@ -3,7 +3,7 @@
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 30.04.2022
-// Last Modified On : 02.05.2022
+// Last Modified On : 14.05.2022
 // Copyrights : Copyright (c) Kristian Schlikow 2022-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
@@ -15,24 +15,29 @@ namespace Skybot.HardCore.Services
     using Discord.Commands;
     using Discord.WebSocket;
 
+    using Interfaces;
+
+    using JetBrains.Annotations;
+
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
 
     using System.Reflection;
 
-    public class CommandHandlingService
+    [PublicAPI]
+    public class CommandHandlingService : ICommandHandlingService
     {
         private readonly CommandService _commands;
         private readonly IConfiguration _configuration;
         private readonly DiscordSocketClient _discord;
-        private readonly LogService _log;
+        private readonly ILogService _log;
         private readonly IServiceProvider _services;
 
         public CommandHandlingService(IServiceProvider services, IConfiguration configuration)
         {
             _commands = services.GetRequiredService<CommandService>();
             _discord = services.GetRequiredService<DiscordSocketClient>();
-            _log = services.GetRequiredService<LogService>();
+            _log = services.GetRequiredService<ILogService>();
             _services = services;
             _configuration = configuration;
 
@@ -67,11 +72,14 @@ namespace Skybot.HardCore.Services
             await _commands.ExecuteAsync(context, argPos, _services);
         }
 
-        private static async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        private async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
             // command is unspecified when there was a search failure (command not found); we don't care about these errors
             if (!command.IsSpecified)
             {
+                // var message = context.Message;
+                // await _commands.ExecuteAsync(context, "AddFactComplex \"" + context.Message + "\"", _services);
+
                 return;
             }
 

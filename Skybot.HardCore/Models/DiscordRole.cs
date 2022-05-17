@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// Filename : DiscordUser.cs
+// Filename : DiscordChannel.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 14.05.2022
@@ -15,18 +15,11 @@ namespace Skybot.HardCore.Models
 
     using System.ComponentModel.DataAnnotations;
 
-    public class DiscordUser
+    public class DiscordRole
     {
         [Key]
-        public ulong DiscordUserId { get; set; }
+        public ulong DiscordRoleId { get; set; }
 
-        public string DiscordUserDisplayName { get; set; } = null!;
-
-        public ushort DiscordUserDiscriminator { get; set; }
-
-        [Required]
-        public bool IsBlocked { get; set; }
-
-        public bool IsOwner { get; set; }
+        public string DiscordRoleName { get; set; } = null!;
     }
 }

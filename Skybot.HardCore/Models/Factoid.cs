@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// Filename : DiscordUser.cs
+// Filename : Factoid.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 14.05.2022
@@ -11,22 +11,20 @@
 
 namespace Skybot.HardCore.Models
 {
-    using Microsoft.EntityFrameworkCore;
-
     using System.ComponentModel.DataAnnotations;
 
-    public class DiscordUser
+    public class Factoid
     {
         [Key]
-        public ulong DiscordUserId { get; set; }
-
-        public string DiscordUserDisplayName { get; set; } = null!;
-
-        public ushort DiscordUserDiscriminator { get; set; }
+        public Guid FactId { get; set; }
 
         [Required]
-        public bool IsBlocked { get; set; }
+        public string FactKey { get; set; }
 
-        public bool IsOwner { get; set; }
+        [Required]
+        public string FactContent { get; set; }
+
+        [Required]
+        public DiscordUser UserId { get; set; }
     }
 }

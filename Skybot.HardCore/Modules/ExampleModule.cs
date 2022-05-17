@@ -3,7 +3,7 @@
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 01.05.2022
-// Last Modified On : 02.05.2022
+// Last Modified On : 14.05.2022
 // Copyrights : Copyright (c) Kristian Schlikow 2022-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
@@ -19,6 +19,7 @@ namespace Skybot.HardCore.Modules
     {
         // Get info on a user, or the user who invoked the command if one is not specified
         [Command("userinfo")]
+        [Summary("Provides info about the user.")]
         public async Task UserInfoAsync(IUser? user = null)
         {
             user ??= Context.User;
@@ -28,17 +29,9 @@ namespace Skybot.HardCore.Modules
 
         // [Remainder] takes the rest of the command's arguments as one argument, rather than splitting every space
         [Command("echo")]
+        [Summary("Echoes the input.")]
         public Task EchoAsync([Remainder] string text) // Insert a ZWSP before the text to prevent triggering other bots!
             =>
                 ReplyAsync('\u200B' + text);
-
-        // 'params' will parse space-separated elements into a list
-        [Command("list")]
-        public Task ListAsync(params string[] objects) => ReplyAsync("You listed: " + string.Join("; ", objects));
-
-        // Setting a custom ErrorMessage property will help clarify the precondition error
-        [Command("guild_only")]
-        [RequireContext(ContextType.Guild, ErrorMessage = "Sorry, this command must be ran from within a server, not a DM!")]
-        public Task GuildOnlyCommand() => ReplyAsync("Nothing to see here!");
     }
 }

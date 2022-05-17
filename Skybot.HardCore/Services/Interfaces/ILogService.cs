@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// Filename : DiscordUser.cs
+// Filename : ILogService.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 14.05.2022
@@ -9,24 +9,14 @@
 // If present, the license takes precedence over the individual notice within this file
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Skybot.HardCore.Models
+namespace Skybot.HardCore.Services.Interfaces
 {
-    using Microsoft.EntityFrameworkCore;
+    using Discord;
 
-    using System.ComponentModel.DataAnnotations;
-
-    public class DiscordUser
+    public interface ILogService
     {
-        [Key]
-        public ulong DiscordUserId { get; set; }
+        Task LogAsync(LogSeverity severity, string source, string message, Exception? exception = null);
 
-        public string DiscordUserDisplayName { get; set; } = null!;
-
-        public ushort DiscordUserDiscriminator { get; set; }
-
-        [Required]
-        public bool IsBlocked { get; set; }
-
-        public bool IsOwner { get; set; }
+        Task LogAsync(LogMessage message);
     }
 }

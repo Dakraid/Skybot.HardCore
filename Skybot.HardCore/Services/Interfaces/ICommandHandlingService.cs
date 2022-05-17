@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// Filename : DiscordUser.cs
+// Filename : ICommandHandlingService.cs
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 14.05.2022
@@ -9,24 +9,10 @@
 // If present, the license takes precedence over the individual notice within this file
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Skybot.HardCore.Models
+namespace Skybot.HardCore.Services.Interfaces
 {
-    using Microsoft.EntityFrameworkCore;
-
-    using System.ComponentModel.DataAnnotations;
-
-    public class DiscordUser
+    public interface ICommandHandlingService
     {
-        [Key]
-        public ulong DiscordUserId { get; set; }
-
-        public string DiscordUserDisplayName { get; set; } = null!;
-
-        public ushort DiscordUserDiscriminator { get; set; }
-
-        [Required]
-        public bool IsBlocked { get; set; }
-
-        public bool IsOwner { get; set; }
+        Task InitializeAsync();
     }
 }

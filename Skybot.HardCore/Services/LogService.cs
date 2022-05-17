@@ -3,7 +3,7 @@
 // Project: Skybot.HardCore / Skybot.HardCore
 // Author : Kristian Schlikow (kristian@schlikow.de)
 // Created On : 30.04.2022
-// Last Modified On : 02.05.2022
+// Last Modified On : 14.05.2022
 // Copyrights : Copyright (c) Kristian Schlikow 2022-2022, All Rights Reserved
 // License: License is provided as described within the LICENSE file shipped with the project
 // If present, the license takes precedence over the individual notice within this file
@@ -13,13 +13,17 @@ namespace Skybot.HardCore.Services
 {
     using Discord;
 
+    using Interfaces;
+
     using Microsoft.Extensions.Configuration;
 
-    public class LogService
+    public class LogService : ILogService
     {
         private readonly IConfiguration _configuration;
 
         public LogService(IConfiguration configuration) => _configuration = configuration;
+
+        public Task LogAsync(LogSeverity severity, string source, string message, Exception? exception = null) => LogAsync(new LogMessage(severity, source, message, exception));
 
         public Task LogAsync(LogMessage message)
         {
@@ -61,6 +65,17 @@ namespace Skybot.HardCore.Services
             }
             Console.WriteLine($"{DateTime.Now,-19} [{message.Severity,8}] {message.Source}: {message.Message} {message.Exception}");
             Console.ResetColor();
+
+
+            var logFile = _configuration.GetValue<string>("Logger:LogToFile");
+
+            if (!string.IsNullOrWhiteSpace(logFile))
+            {
+                File.AppendAllLinesAsync(logFile, new[]
+                {
+                    $"{DateTime.Now,-19} [{message.Severity,8}] {message.Source}: {message.Message} {message.Exception}"
+                });
+            }
 
             return Task.CompletedTask;
         }

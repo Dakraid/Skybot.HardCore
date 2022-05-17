@@ -1,8 +1,17 @@
-namespace Skybot.HardCore.Models.Configuration.Configuration
+// --------------------------------------------------------------------------------------------------------------------
+// Filename : SkybotContext.cs
+// Project: Skybot.HardCore / Skybot.HardCore
+// Author : Kristian Schlikow (kristian@schlikow.de)
+// Created On : 14.05.2022
+// Last Modified On : 14.05.2022
+// Copyrights : Copyright (c) Kristian Schlikow 2022-2022, All Rights Reserved
+// License: License is provided as described within the LICENSE file shipped with the project
+// If present, the license takes precedence over the individual notice within this file
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Skybot.HardCore.Models.Configuration
 {
     using Microsoft.EntityFrameworkCore;
-
-    using Skybot.HardCore.Models;
 
     public class SkybotContext : DbContext
     {
@@ -10,6 +19,9 @@ namespace Skybot.HardCore.Models.Configuration.Configuration
 
         public virtual DbSet<DiscordUser> DiscordUsers { get; set; } = null!;
         public virtual DbSet<DiscordChannel> DiscordChannels { get; set; } = null!;
+        public virtual DbSet<DiscordRole> DiscordRoles { get; set; } = null!;
+        public virtual DbSet<BotPermission> BotPermissions { get; set; } = null!;
+        public virtual DbSet<Factoid> Factoids { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -18,16 +30,26 @@ namespace Skybot.HardCore.Models.Configuration.Configuration
             modelBuilder.Entity<DiscordUser>(entity =>
             {
                 entity.ToTable("discordUsers");
-                entity.Property(e => e.UserId);
-                entity.Property(e => e.DiscordUserDiscriminator).HasPrecision(5);
-                entity.Property(e => e.DiscordUserId).HasPrecision(20);
             });
 
             modelBuilder.Entity<DiscordChannel>(entity =>
             {
                 entity.ToTable("discordChannels");
-                entity.Property(e => e.ChannelId);
-                entity.Property(e => e.DiscordChannelId).HasPrecision(20);
+            });
+
+            modelBuilder.Entity<DiscordRole>(entity =>
+            {
+                entity.ToTable("discordRoles");
+            });
+
+            modelBuilder.Entity<BotPermission>(entity =>
+            {
+                entity.ToTable("botPermissions");
+            });
+
+            modelBuilder.Entity<Factoid>(entity =>
+            {
+                entity.ToTable("factoids");
             });
         }
     }
